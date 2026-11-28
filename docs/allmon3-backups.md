@@ -2,7 +2,8 @@
 
 WebUI's default include list now also includes these paths when present:
 
-- `/etc/allmon3/favorites`
+- `/etc/allmon3/favorites.json` (current Favorites default)
+- `/etc/allmon3/favorites` (earlier preview location, retained for migration)
 - `/etc/allmon3/audio` (SQLite metadata/schedules/enable flags and original media)
 - `/etc/allmon3/logging` and `/etc/allmon3/logging-nodes.json`
 - `/etc/allmon3/announcements.ini`, `/etc/allmon3/speech.ini`, `/etc/allmon3/addons.d`

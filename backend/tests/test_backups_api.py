@@ -444,6 +444,7 @@ async def test_allmon3_persistent_data_real_backup_and_restore(env):
     for directory in ("favorites", "audio/audio-originals", "logging", "addons.d"):
         (base / directory).mkdir(parents=True, exist_ok=True)
     values = {
+        "favorites.json": '{"1999":{"2001":"Current default favorite"}}',
         "favorites/favorites.json": '{"1999":{"2000":"Saved favorite"}}',
         "audio/audio-originals/test.wav": "original media fixture",
         "logging/nodes.json": '{"1999":false}',
@@ -494,7 +495,8 @@ async def test_legacy_default_expands_but_custom_include_list_is_preserved(env):
     path.chmod(0o600)
     a = await env.make()
     _, shown = await a.call("GET", "backups/include-list")
-    assert "/etc/allmon3/favorites" in shown["content"]
+    assert "/etc/allmon3/favorites.json" in shown["content"].splitlines()
+    assert "/etc/allmon3/favorites" in shown["content"].splitlines()
     assert path.read_text() == commands.LEGACY_INCLUDE_LIST  # read-only
     assert (await a.job("POST", "backups", {}))["ok"]
     assert path.read_text() == commands.DEFAULT_INCLUDE_LIST and path.stat().st_mode & 0o777 == 0o600
@@ -502,12 +504,14 @@ async def test_legacy_default_expands_but_custom_include_list_is_preserved(env):
     path.write_text(custom)
     audio = env.root / "etc/allmon3/audio"
     audio.mkdir()
+    (audio.parent / "favorites.json").write_text('{"1999":{"2001":"Excluded favorite"}}')
     (audio / "audio.sqlite3").write_text("excluded fixture")
     _, shown = await a.call("GET", "backups/include-list")
-    assert shown["content"] == custom and shown["missing_allmon3"] == ["/etc/allmon3/audio"]
+    assert shown["content"] == custom and shown["missing_allmon3"] == ["/etc/allmon3/favorites.json", "/etc/allmon3/audio"]
     made = await a.job("POST", "backups", {})
     assert made["ok"] and any("excludes Allmon3 data" in s for s in made["lines"])
     assert path.read_text() == custom
     _, data = await a.call("GET", f"backups/local/{made['result']['name']}/download")
     with tarfile.open(fileobj=io.BytesIO(data)) as tar:
         assert "etc/allmon3/audio/audio.sqlite3" not in tar.getnames()
+        assert "etc/allmon3/favorites.json" not in tar.getnames()

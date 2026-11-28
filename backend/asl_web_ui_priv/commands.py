@@ -102,7 +102,8 @@ LEGACY_INCLUDE_LIST = """\
 # Specific persistent add-in paths, not all of /etc/allmon3 (which may contain
 # caches or unrelated local files). Existing customized lists stay authoritative.
 ALLMON3_BACKUP_PATHS = (
-    "/etc/allmon3/favorites", "/etc/allmon3/audio", "/etc/allmon3/logging",
+    "/etc/allmon3/favorites.json", "/etc/allmon3/favorites",
+    "/etc/allmon3/audio", "/etc/allmon3/logging",
     "/etc/allmon3/logging-nodes.json", "/etc/allmon3/announcements.ini",
     "/etc/allmon3/speech.ini", "/etc/allmon3/addons.d",
 )
